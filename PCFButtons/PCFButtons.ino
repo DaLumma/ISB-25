@@ -30,10 +30,6 @@ void setup(){
     PCFread(PCF5, 4);
     
     sendCommand("page 2");
-/*     for (int i = 0; i < 5; i++)
-    {
-        Serial.println(depressedButtons[i], BIN);
-    } */
 }
 
 void loop(){
