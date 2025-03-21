@@ -4,7 +4,7 @@
 SoftwareSerial nextion (3,4); // RX,TX
 Adafruit_PCF8574 PCF1, PCF2, PCF3, PCF4, PCF5;
 
-byte depressedButtons[5] = {0,0,0,0,0};
+byte depressedButtons[5];
 int btIDs[5][5] = {
     {0,1,2,3,4},
     {5,6,7,8,9},
