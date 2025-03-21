@@ -13,6 +13,14 @@ int btIDs[5][5] = {
     {20,21,22,23,24}
 };
 
+//  User Data
+String EGS12A[5][5] = {
+    {"Mandl\\rHans","Mandl\\rHans","Robert\\rHinkofer","Mandl\\rHans","Mandl\\rHans"},
+    {"Mandl\\rHans","Mandl\\rHans","Bruno\\rBrunner","Mandl\\rHans","Mandl\\rHans"},
+    {"Carolynn\\rVogl","Mandl\\rHans","Martin\\rWushupl","Mandl\\rHans","Klaus\\rPfuscher"},
+    {"Mandl\\rHans","Mandl\\rHans","Achsel\\rSchweis","Hartmann\\rLex","Mandl\\rHans"},
+    {"Mandl\\rHans","Mandl\\rHans","Schlummberger\\rSchlumm","Mandl\\rHans","Mandl\\rHans"}};
+
 void setup(){
     Serial.begin(9600);
     nextion.begin(9600);
@@ -29,7 +37,8 @@ void setup(){
     PCFread(PCF4, 3);
     PCFread(PCF5, 4);
     
-    sendCommand("page 2");
+    sendCommand("page 1");
+    writeNames();
 }
 
 void loop(){
@@ -46,6 +55,17 @@ void sendCommand(String cmd) {
     nextion.write(0xFF);
     nextion.write(0xFF);
     nextion.write(0xFF);
+}
+
+void writeNames(){
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 5; j++)
+        {
+            sendCommand("bt" + String(btIDs[i][j]) + ".txt=" + "\"" + EGS12A[j][i] + "\"");
+            Serial.println("bt" + String(btIDs[i][j]) + ".txt=" + "\"" + EGS12A[i][j] + "\"");
+        }
+    }
 }
 
 //PCF Functions
