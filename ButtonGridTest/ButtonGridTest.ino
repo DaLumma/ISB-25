@@ -7,7 +7,7 @@ SoftwareSerial nextion (3, 4);
 Adafruit_MCP23X17 mcp;
 
 //  User Data
-String EGS12A[5][5] = {
+String names[5][5] = {
     {"Mandl\nHans","Mandl\nHans","Mandl\nHans","Mandl\nHans","Mandl\nHans"},
     {"Mandl\nHans","Mandl\nHans","Mandl\nHans","Mandl\nHans","Mandl\nHans"},
     {"Mandl\nHans","Mandl\nHans","Mandl\nHans","Mandl\nHans","Mandl\nHans"},
@@ -161,7 +161,7 @@ void writeNames() {
     {
         for (int j = 0; j < 5; j++)
         {
-            sendCommand("t" + String(ButtonFields[i][j]) + ".txt=" + EGS12A[i][j]);
+            sendCommand("t" + String(ButtonFields[i][j]) + ".txt=" + names[i][j]);
         }
         
     }
