@@ -14,12 +14,13 @@ int btIDs[5][5] = {
 };
 
 //  User Data
+String receivedText;
 String names[5][5] = {
-    {"Mandl\\rHans","Mandl\\rHans","Robert\\rHinkofer","Mandl\\rHans","Mandl\\rHans"},
-    {"Mandl\\rHans","Mandl\\rHans","Bruno\\rBrunner","Mandl\\rHans","Mandl\\rHans"},
-    {"Carolynn\\rVogl","Mandl\\rHans","Martin\\rWushupl","Mandl\\rHans","Klaus\\rPfuscher"},
-    {"Mandl\\rHans","Mandl\\rHans","Achsel\\rSchweis","Burger\\rDav","Mandl\\rHans"},
-    {"Mandl\\rHans","Mandl\\rHans","Schlummberger\\rSchlumm","Mandl\\rHans","Mandl\\rHans"}};
+    {"Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann"},
+    {"Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann"},
+    {"Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann"},
+    {"Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann"},
+    {"Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann"}};
 
 void setup(){
     Serial.begin(9600);
@@ -47,24 +48,7 @@ void loop(){
     checkChanges(PCF3, 2);
     checkChanges(PCF4, 3);
     checkChanges(PCF5, 4);
-
-
-
-    String receivedText = nextion.readStringUntil('!');
-    if (!(receivedText == ""))
-    {   
-        if (receivedText == "begin")
-        {
-            for (int i = 0; i < 25; i++)
-            {
-                receivedText = nextion.readStringUntil('!');
-                Serial.println(receivedText);
-            }
-            
-        }
-        
-        //Serial.println(receivedText/* .substring(0,receivedText.length()-1) */);
-    }
+    readNames();
 }
 
 //Nextion Functions
@@ -81,6 +65,26 @@ void writeNames(){
         for (int j = 0; j < 5; j++)
         {
             sendCommand("bt" + String(btIDs[j][i]) + ".txt=" + "\"" + names[j][i] + "\"");
+        }
+    }
+}
+
+void readNames(){
+    receivedText = nextion.readStringUntil('!');
+    if (!(receivedText == ""))
+    {   
+        if (receivedText == "begin")
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                for (int j = 0; j < 5; j++)
+                {
+                    receivedText = nextion.readStringUntil('!');
+                    Serial.println(receivedText);
+                    names[j][i] = receivedText;
+                }
+            }
+            writeNames();
         }
     }
 }
