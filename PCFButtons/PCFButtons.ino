@@ -50,10 +50,20 @@ void loop(){
 
 
 
-    String receivedText = nextion.readString();
-    if (receivedText.endsWith("end") && !(receivedText == ""))
-    {
-        Serial.println(receivedText.substring(0,receivedText.length()-3));
+    String receivedText = nextion.readStringUntil('!');
+    if (!(receivedText == ""))
+    {   
+        if (receivedText == "begin")
+        {
+            for (int i = 0; i < 25; i++)
+            {
+                receivedText = nextion.readStringUntil('!');
+                Serial.println(receivedText);
+            }
+            
+        }
+        
+        //Serial.println(receivedText/* .substring(0,receivedText.length()-1) */);
     }
 }
 
