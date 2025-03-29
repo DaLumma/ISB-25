@@ -1,6 +1,19 @@
 #include <Adafruit_PCF8574.h>
 #include <SoftwareSerial.h>
 
+#define SCK_RFID 13
+#define MISO_RFID 12
+#define MOSI_RFID 11
+#define SDA_RFID 10
+#define RST_RFID 9
+
+#define Door_Switch2 8
+#define Door_Switch1 7
+#define PWM_Servo2 6
+#define PWM_Servo1 5
+
+#define LED_STAT 2 //NOT FINAL!!!
+
 SoftwareSerial nextion (3,4); // RX,TX
 Adafruit_PCF8574 PCF1, PCF2, PCF3, PCF4, PCF5;
 
