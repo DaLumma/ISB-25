@@ -189,6 +189,7 @@ void saveNames() {
             adress = adress + 1 * 40;
         }
     }
+    saveEmptySlots();
 }
 
 void loadNames() {
@@ -201,6 +202,7 @@ void loadNames() {
             adress = adress + 1 * 40;
         }
     }
+    loadEmptySlots();
 }
 
 void writeStringToEEPROM(int addrOffset, const String &strToWrite) {
@@ -219,4 +221,26 @@ String readStringFromEEPROM(int addrOffset) {
     }
     data[newStrLen] = '\0';
     return String(data);
+}
+
+void saveEmptySlots() {
+    int adress = 0;
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            EEPROM.write(adress, names[i][j] == "");
+            adress++;
+        }
+    }
+}
+
+void loadEmptySlots() {
+    int adress = 0;
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            if (EEPROM.read(adress) == 1) {
+                sendCommand("bt" + String(btIDs[i][j]) + ".val=1");
+            }
+            adress++;
+        }
+    }
 }
