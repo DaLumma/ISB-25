@@ -66,9 +66,10 @@ void setup(){
     PCFread(PCF4, 3);
     PCFread(PCF5, 4);
     
-    sendCommand("page 1");
-    loadNames();
     writeNames();
+    loadNames();
+    loadEmptySlots();
+    sendCommand("page 1");
 }
 
 void loop(){
@@ -93,7 +94,8 @@ void writeNames(){
     {
         for (int j = 0; j < 5; j++)
         {
-            sendCommand("bt" + String(btIDs[j][i]) + ".txt=" + "\"" + names[j][i] + "\"");
+            sendCommand("Button_page.bt" + String(btIDs[j][i]) + ".txt=" + "\"" + names[j][i] + "\"");
+            sendCommand("Text_page.t" + String(btIDs[j][i]) + ".txt=" + "\"" + names[j][i] + "\"");
         }
     }
 }
@@ -115,6 +117,7 @@ void readNames(){
             }
             saveNames();
             writeNames();
+            loadEmptySlots();
         }
     }
 }
@@ -202,7 +205,6 @@ void loadNames() {
             adress = adress + 1 * 40;
         }
     }
-    loadEmptySlots();
 }
 
 void writeStringToEEPROM(int addrOffset, const String &strToWrite) {
@@ -224,7 +226,7 @@ String readStringFromEEPROM(int addrOffset) {
 }
 
 void saveEmptySlots() {
-    int adress = 0;
+    int adress = 1000;
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 5; j++) {
             EEPROM.write(adress, names[i][j] == "");
@@ -234,7 +236,7 @@ void saveEmptySlots() {
 }
 
 void loadEmptySlots() {
-    int adress = 0;
+    int adress = 1000;
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 5; j++) {
             if (EEPROM.read(adress) == 1) {
