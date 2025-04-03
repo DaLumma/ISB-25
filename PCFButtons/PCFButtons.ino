@@ -65,9 +65,9 @@ void setup(){
     PCFread(PCF3, 2);
     PCFread(PCF4, 3);
     PCFread(PCF5, 4);
-    
-    writeNames();
+
     loadNames();
+    writeNames();
     loadEmptySlots();
     sendCommand("page 1");
 }
@@ -102,7 +102,7 @@ void writeNames(){
 
 void readNames(){
     receivedText = nextion.readStringUntil('!');
-    if (!(receivedText == ""))
+    if (receivedText != "")
     {   
         if (receivedText == "begin")
         {
@@ -117,7 +117,6 @@ void readNames(){
             }
             saveNames();
             writeNames();
-            loadEmptySlots();
         }
     }
 }
