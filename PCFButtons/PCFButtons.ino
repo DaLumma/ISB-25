@@ -2,6 +2,7 @@
 #include <SoftwareSerial.h>
 #include <SPI.h>
 #include <MFRC522.h>
+#include <EEPROM.h>
 
 #define SCK_RFID 13
 #define MISO_RFID 12
@@ -36,7 +37,8 @@ String names[5][5] = {
     {"Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann"},
     {"Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann"},
     {"Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann"},
-    {"Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann"}};
+    {"Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann"}
+};
 
 void setup(){
     Serial.begin(9600);
@@ -65,6 +67,7 @@ void setup(){
     PCFread(PCF5, 4);
     
     sendCommand("page 1");
+    loadNames();
     writeNames();
 }
 
@@ -110,6 +113,7 @@ void readNames(){
                     names[j][i] = receivedText;
                 }
             }
+            saveNames();
             writeNames();
         }
     }
@@ -172,4 +176,47 @@ void readRFID() {
     }
     Serial.println();
     // Mit dieser Zeile wird auf dem Serial Monitor nur ein Zeilenumbruch gemacht.
+}
+
+// EEPROM Functions
+void saveNames() {
+    int adress = 0;
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 5; j++)
+        {
+            writeStringToEEPROM(adress, names[i][j]);
+            adress = adress + 1 * 40;
+        }
+    }
+}
+
+void loadNames() {
+    int adress = 0;
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 5; j++)
+        {
+            names[i][j] = readStringFromEEPROM(adress);
+            adress = adress + 1 * 40;
+        }
+    }
+}
+
+void writeStringToEEPROM(int addrOffset, const String &strToWrite) {
+    byte len = strToWrite.length();
+    EEPROM.write(addrOffset, len);
+    for (int i = 0; i < len; i++) {
+        EEPROM.write(addrOffset + 1 + i, strToWrite[i]);
+    }
+}
+
+String readStringFromEEPROM(int addrOffset) {
+    int newStrLen = EEPROM.read(addrOffset);
+    char data[newStrLen + 1];
+    for (int i = 0; i < newStrLen; i++) {
+        data[i] = EEPROM.read(addrOffset + 1 + i);
+    }
+    data[newStrLen] = '\0';
+    return String(data);
 }
