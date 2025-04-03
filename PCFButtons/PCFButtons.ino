@@ -68,7 +68,6 @@ void setup(){
 
     loadNames();
     writeNames();
-    loadEmptySlots();
     sendCommand("page 1");
 }
 
@@ -98,6 +97,7 @@ void writeNames(){
             sendCommand("Text_page.t" + String(btIDs[j][i]) + ".txt=" + "\"" + names[j][i] + "\"");
         }
     }
+    loadEmptySlots();
 }
 
 void readNames(){
@@ -228,7 +228,12 @@ void saveEmptySlots() {
     int adress = 1000;
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 5; j++) {
-            EEPROM.write(adress, names[i][j] == "");
+            if (names[i][j] == "")
+            {
+                EEPROM.write(adress, 1);
+            } else {
+                EEPROM.write(adress, 0);
+            }
             adress++;
         }
     }
@@ -239,7 +244,9 @@ void loadEmptySlots() {
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 5; j++) {
             if (EEPROM.read(adress) == 1) {
-                sendCommand("bt" + String(btIDs[i][j]) + ".val=1");
+                sendCommand("Button_page.bt" + String(btIDs[i][j]) + ".val=1");
+            } else {
+                sendCommand("Button_page.bt" + String(btIDs[i][j]) + ".val=0");
             }
             adress++;
         }
