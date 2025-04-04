@@ -54,6 +54,7 @@ void setup(){
     
     pinMode(LED_STAT, OUTPUT);
 
+    sendCommand("page 0");
     PCFsetup(PCF1, 0x20);
     PCFsetup(PCF2, 0x21);
     PCFsetup(PCF3, 0x3A);
@@ -134,24 +135,29 @@ void PCFsetup(Adafruit_PCF8574 &PCF, int adress){
 }
 
 void PCFread(Adafruit_PCF8574 &PCF, int spalte){
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 5; i++)
     {
         bitWrite(depressedButtons[spalte], i, bitRead(bit(PCF.digitalRead(i)), 1));// Convert Bool to bit
+        if (!PCF.digitalRead(i))
+        {
+            sendCommand("Button_page.bt" + String(btIDs[i][spalte]) + ".val=1");
+        }
+        
     }
 }
 
 void checkChanges(Adafruit_PCF8574 &PCF, int spalte){
     for (int i = 0; i < 5; i++)
     {
-        if (PCF.digitalRead(i) == LOW && bitRead(depressedButtons[spalte],i) == 1)
+        if (PCF.digitalRead(i) == LOW && bitRead(depressedButtons[i], spalte) == 1)
         {
-            bitWrite(depressedButtons[spalte], i, 0);
-            sendCommand("bt" + String(btIDs[spalte][i]) + ".val=1");
+            bitWrite(depressedButtons[i], spalte, 0);
+            sendCommand("Button_page.bt" + String(btIDs[i][spalte]) + ".val=1");
         }
-        else if (PCF.digitalRead(i) == HIGH && bitRead(depressedButtons[spalte],i) == 0)
+        else if (PCF.digitalRead(i) == HIGH && bitRead(depressedButtons[i], spalte) == 0)
         {
-            bitWrite(depressedButtons[spalte], i, 1);
-            sendCommand("bt" + String(btIDs[spalte][i]) + ".val=0");
+            bitWrite(depressedButtons[i], spalte, 1);
+            sendCommand("Button_page.bt" + String(btIDs[i][spalte]) + ".val=0");
         }
     }
     
@@ -225,7 +231,7 @@ String readStringFromEEPROM(int addrOffset) {
 }
 
 void saveEmptySlots() {
-    int adress = 1000;
+    int adress = 999;
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 5; j++) {
             if (names[i][j] == "")
@@ -240,7 +246,7 @@ void saveEmptySlots() {
 }
 
 void loadEmptySlots() {
-    int adress = 1000;
+    int adress = 999;
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 5; j++) {
             if (EEPROM.read(adress) == 1) {
@@ -251,4 +257,9 @@ void loadEmptySlots() {
             adress++;
         }
     }
+    PCFread(PCF1, 0);
+    PCFread(PCF2, 1);
+    PCFread(PCF3, 2);
+    PCFread(PCF4, 3);
+    PCFread(PCF5, 4);
 }
