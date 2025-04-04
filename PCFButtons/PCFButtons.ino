@@ -3,6 +3,7 @@
 #include <SPI.h>
 #include <MFRC522.h>
 #include <EEPROM.h>
+#include <Servo.h>
 
 #define SCK_RFID 13
 #define MISO_RFID 12
@@ -19,7 +20,11 @@
 
 SoftwareSerial nextion (3,4); // RX,TX
 Adafruit_PCF8574 PCF1, PCF2, PCF3, PCF4, PCF5;
+
 MFRC522 mfrc522(SDA_RFID, RST_RFID);
+String rfidKey = "11 99 4C 26";
+boolean lidLocked = false;
+Servo Servo1, Servo2;
 
 byte depressedButtons[5];
 int btIDs[5][5] = {
@@ -46,11 +51,13 @@ void setup(){
     SPI.begin();
     mfrc522.PCD_Init();
 
+    Servo1.attach(PWM_Servo1);
+    Servo2.attach(PWM_Servo2);
+    Servo1.write(95);
+    Servo2.write(95);
+
     pinMode(Door_Switch1, INPUT_PULLUP);
     pinMode(Door_Switch2, INPUT_PULLUP);
-
-    pinMode(PWM_Servo1, OUTPUT);
-    pinMode(PWM_Servo2, OUTPUT);
     
     pinMode(LED_STAT, OUTPUT);
 
@@ -79,6 +86,7 @@ void loop(){
     checkChanges(PCF4, 3);
     checkChanges(PCF5, 4);
     readNames();
+    lockLid();
 }
 
 //Nextion Functions
@@ -164,26 +172,39 @@ void checkChanges(Adafruit_PCF8574 &PCF, int spalte){
 }
 
 // RFID Functions
-void readRFID() {
-    if (!mfrc522.PICC_IsNewCardPresent()) // Wenn eine Karte in Reichweite //ist...
-    {
-        return; // gehe weiter...
+boolean readRFID() {
+    if (!mfrc522.PICC_IsNewCardPresent()) {
+        return false;
     }
-    if (!mfrc522.PICC_ReadCardSerial()) // Wenn ein RFID-Sender ausgewählt wurde
-    {
-        return; // gehe weiter...
+    if (!mfrc522.PICC_ReadCardSerial()) {
+        return false;
     }
-    Serial.print("Die ID des RFID-TAGS lautet:");
-    //"Die ID des RFID-TAGS lautet:" wird auf den Serial Monitor geschrieben
-    for (byte i = 0; i < mfrc522.uid.size; i++)
-    {
-        Serial.print(mfrc522.uid.uidByte[i], HEX);
-        // Dann wird die UID ausgelesen,die aus vier einzelnen Blöcken besteht und der Reihe nach an den Serial Monitor gesendet. Die Endung Hex bedeutet, dass die vier Blöcke der UID als HEX-Zahl (also auch mit Buchstaben) ausgegeben wird
-        Serial.print(" ");
-        // Der Befehl „Serial.print(" ");“ sorgt dafür, dass zwischen den einzelnen ausgelesenen Blöcken ein Leerzeichen steht.
+    String readKey = "";
+    byte letter;
+    for (byte i = 0; i < mfrc522.uid.size; i++) {
+        readKey.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
+        readKey.concat(String(mfrc522.uid.uidByte[i], HEX));
     }
-    Serial.println();
-    // Mit dieser Zeile wird auf dem Serial Monitor nur ein Zeilenumbruch gemacht.
+    readKey.toUpperCase();
+    if (readKey.substring(1) == rfidKey) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void lockLid() {
+    if (!digitalRead(Door_Switch1) && !digitalRead(Door_Switch2) && !lidLocked)
+    {
+        if (readRFID())
+        {
+            lidLocked = true;
+            Servo1.write(5);
+            Servo2.write(5);
+            Serial.println("locked");
+        }
+    }
+    
 }
 
 // EEPROM Functions
