@@ -16,7 +16,7 @@
 #define PWM_Servo2 6
 #define PWM_Servo1 5
 
-#define LED_STAT 2 //NOT FINAL!!!
+#define LED_STAT 14
 
 SoftwareSerial nextion (3,4); // RX,TX
 Adafruit_PCF8574 PCF1, PCF2, PCF3, PCF4, PCF5;
@@ -25,6 +25,8 @@ MFRC522 mfrc522(SDA_RFID, RST_RFID);
 String rfidKey = "11 99 4C 26";
 boolean lidLocked = false;
 Servo Servo1, Servo2;
+int lockedDeg = 0;
+int unlockedDeg = 45;
 
 byte depressedButtons[5];
 int btIDs[5][5] = {
@@ -53,8 +55,8 @@ void setup(){
 
     Servo1.attach(PWM_Servo1);
     Servo2.attach(PWM_Servo2);
-    Servo1.write(95);
-    Servo2.write(95);
+    Servo1.write(unlockedDeg);
+    Servo2.write(unlockedDeg);
 
     pinMode(Door_Switch1, INPUT_PULLUP);
     pinMode(Door_Switch2, INPUT_PULLUP);
@@ -86,10 +88,11 @@ void loop(){
     checkChanges(PCF4, 3);
     checkChanges(PCF5, 4);
     readNames();
+    readButtonOverrides();
     lockLid();
     for(int i = 0; i < 5; i++) {
         Serial.println(depressedButtons[i], BIN);
-}
+    }
 }
 
 //Nextion Functions
@@ -118,6 +121,7 @@ void readNames(){
     {   
         if (receivedText == "begin")
         {
+            Serial.println(nextion.available());
             for (int i = 0; i < 5; i++)
             {
                 for (int j = 0; j < 5; j++)
@@ -131,6 +135,15 @@ void readNames(){
             writeNames();
         }
     }
+}
+
+void readButtonOverrides() {
+    if (nextion.available() > 1)
+    {
+        String readData = nextion.readString();
+        Serial.println("Button Press: " + readData);
+    }
+    
 }
 
 //PCF Functions
@@ -197,17 +210,30 @@ boolean readRFID() {
 }
 
 void lockLid() {
-    if (!digitalRead(Door_Switch1) && !digitalRead(Door_Switch2) && !lidLocked)
+    int rfidCooldown;
+    if (rfidCooldown + 5000 <= millis())
     {
-        if (readRFID())
+        if (!digitalRead(Door_Switch1) && !digitalRead(Door_Switch2) && !lidLocked)
         {
-            lidLocked = true;
-            Servo1.write(5);
-            Servo2.write(5);
-            Serial.println("locked");
+            if (readRFID())
+            {
+                lidLocked = true;
+                Servo1.write(lockedDeg);
+                Servo2.write(lockedDeg);
+                Serial.println("locked");
+            }
+        } else if (!digitalRead(Door_Switch1) && !digitalRead(Door_Switch2) && lidLocked)
+        {
+            if (readRFID())
+            {
+                lidLocked = false;
+                Servo1.write(unlockedDeg);
+                Servo2.write(unlockedDeg);
+                Serial.println("unlocked");
+            }
         }
+        rfidCooldown = millis();
     }
-    
 }
 
 // EEPROM Functions
