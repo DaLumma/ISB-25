@@ -87,6 +87,9 @@ void loop(){
     checkChanges(PCF5, 4);
     readNames();
     lockLid();
+    for(int i = 0; i < 5; i++) {
+        Serial.println(depressedButtons[i], BIN);
+}
 }
 
 //Nextion Functions
