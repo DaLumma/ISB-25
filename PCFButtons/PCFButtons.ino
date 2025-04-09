@@ -26,7 +26,7 @@ String rfidKey = "11 99 4C 26";
 boolean lidLocked = false;
 Servo Servo1, Servo2;
 int lockedDeg = 0;
-int unlockedDeg = 45;
+int unlockedDeg = 180;
 
 byte depressedButtons[5];
 int btIDs[5][5] = {
@@ -39,13 +39,7 @@ int btIDs[5][5] = {
 
 //  User Data
 String receivedText;
-String names[5][5] = {
-    {"Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann"},
-    {"Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann"},
-    {"Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann"},
-    {"Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann"},
-    {"Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann","Max\\rMustermann"}
-};
+String names[5][5];
 
 void setup(){
     Serial.begin(9600);
@@ -88,11 +82,8 @@ void loop(){
     checkChanges(PCF4, 3);
     checkChanges(PCF5, 4);
     readNames();
-    readButtonOverrides();
     lockLid();
-    for(int i = 0; i < 5; i++) {
-        Serial.println(depressedButtons[i], BIN);
-    }
+    Serial.println(nextion.available());
 }
 
 //Nextion Functions
@@ -133,6 +124,7 @@ void readNames(){
             }
             saveNames();
             writeNames();
+            sendCommand("page 1");
         }
     }
 }
@@ -220,16 +212,16 @@ void lockLid() {
                 lidLocked = true;
                 Servo1.write(lockedDeg);
                 Servo2.write(lockedDeg);
-                Serial.println("locked");
+                sendCommand("page 4");
             }
-        } else if (!digitalRead(Door_Switch1) && !digitalRead(Door_Switch2) && lidLocked)
+        } else if (lidLocked)
         {
             if (readRFID())
             {
                 lidLocked = false;
                 Servo1.write(unlockedDeg);
                 Servo2.write(unlockedDeg);
-                Serial.println("unlocked");
+                sendCommand("page 1");
             }
         }
         rfidCooldown = millis();
