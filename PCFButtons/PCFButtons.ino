@@ -83,7 +83,6 @@ void loop(){
     checkChanges(PCF5, 4);
     readNames();
     lockLid();
-    Serial.println(nextion.available());
 }
 
 //Nextion Functions
