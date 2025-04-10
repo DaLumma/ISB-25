@@ -18,7 +18,7 @@
 
 #define LED_STAT 14
 
-SoftwareSerial nextion (3,4); // RX,TX
+SoftwareSerial nextion(3, 4); // RX,TX
 Adafruit_PCF8574 PCF1, PCF2, PCF3, PCF4, PCF5;
 
 MFRC522 mfrc522(SDA_RFID, RST_RFID);
@@ -30,18 +30,18 @@ int unlockedDeg = 180;
 
 byte depressedButtons[5];
 int btIDs[5][5] = {
-    {0,5,10,15,20},
-    {1,6,11,16,21},
-    {2,7,12,17,22},
-    {3,8,13,18,23},
-    {4,9,14,19,24}
-};
+    {0, 5, 10, 15, 20},
+    {1, 6, 11, 16, 21},
+    {2, 7, 12, 17, 22},
+    {3, 8, 13, 18, 23},
+    {4, 9, 14, 19, 24}};
 
 //  User Data
 String receivedText;
 String names[5][5];
 
-void setup(){
+void setup()
+{
     Serial.begin(9600);
     nextion.begin(9600);
     SPI.begin();
@@ -54,7 +54,7 @@ void setup(){
 
     pinMode(Door_Switch1, INPUT_PULLUP);
     pinMode(Door_Switch2, INPUT_PULLUP);
-    
+
     pinMode(LED_STAT, OUTPUT);
 
     sendCommand("page 0");
@@ -76,7 +76,8 @@ void setup(){
     digitalWrite(LED_STAT, HIGH);
 }
 
-void loop(){
+void loop()
+{
     checkChanges(PCF1, 0);
     checkChanges(PCF2, 1);
     checkChanges(PCF3, 2);
@@ -86,15 +87,17 @@ void loop(){
     lockLid();
 }
 
-//Nextion Functions
-void sendCommand(String cmd) {
+// Nextion Functions
+void sendCommand(String cmd)
+{
     nextion.print(cmd);
     nextion.write(0xFF);
     nextion.write(0xFF);
     nextion.write(0xFF);
 }
 
-void writeNames(){
+void writeNames()
+{
     for (int i = 0; i < 5; i++)
     {
         for (int j = 0; j < 5; j++)
@@ -106,10 +109,11 @@ void writeNames(){
     loadEmptySlots();
 }
 
-void readNames(){
+void readNames()
+{
     receivedText = nextion.readStringUntil('!');
     if (receivedText != "")
-    {   
+    {
         if (receivedText == "begin")
         {
             digitalWrite(LED_STAT, LOW);
@@ -131,40 +135,44 @@ void readNames(){
     }
 }
 
-void readButtonOverrides() {
+void readButtonOverrides()
+{
     if (nextion.available() > 1)
     {
         String readData = nextion.readString();
         Serial.println("Button Press: " + readData);
     }
-    
 }
 
-//PCF Functions
-void PCFsetup(Adafruit_PCF8574 &PCF, int adress){
+// PCF Functions
+void PCFsetup(Adafruit_PCF8574 &PCF, int adress)
+{
     if (!PCF.begin(adress, &Wire))
-        {   
-            Serial.println("Couldn't find PCF8574" + adress);
-        }
+    {
+        Serial.println("Couldn't find PCF8574" + adress);
+    }
     for (size_t i = 0; i < 5; i++)
-        {
-            PCF.pinMode(i, INPUT_PULLUP);
-        }
+    {
+        PCF.pinMode(i, INPUT_PULLUP);
+    }
+    PCF.pinMode(7, OUTPUT);
+    PCF.digitalWrite(7, HIGH);
 }
 
-void PCFread(Adafruit_PCF8574 &PCF, int spalte){
+void PCFread(Adafruit_PCF8574 &PCF, int spalte)
+{
     for (int i = 0; i < 5; i++)
     {
-        bitWrite(depressedButtons[spalte], i, bitRead(bit(PCF.digitalRead(i)), 1));// Convert Bool to bit
+        bitWrite(depressedButtons[spalte], i, bitRead(bit(PCF.digitalRead(i)), 1)); // Convert Bool to bit
         if (!PCF.digitalRead(i))
         {
             sendCommand("Button_page.bt" + String(btIDs[i][spalte]) + ".val=1");
         }
-        
     }
 }
 
-void checkChanges(Adafruit_PCF8574 &PCF, int spalte){
+void checkChanges(Adafruit_PCF8574 &PCF, int spalte)
+{
     for (int i = 0; i < 5; i++)
     {
         if (PCF.digitalRead(i) == LOW && bitRead(depressedButtons[i], spalte) == 1)
@@ -178,32 +186,39 @@ void checkChanges(Adafruit_PCF8574 &PCF, int spalte){
             sendCommand("Button_page.bt" + String(btIDs[i][spalte]) + ".val=0");
         }
     }
-    
 }
 
 // RFID Functions
-boolean readRFID() {
-    if (!mfrc522.PICC_IsNewCardPresent()) {
+boolean readRFID()
+{
+    if (!mfrc522.PICC_IsNewCardPresent())
+    {
         return false;
     }
-    if (!mfrc522.PICC_ReadCardSerial()) {
+    if (!mfrc522.PICC_ReadCardSerial())
+    {
         return false;
     }
     String readKey = "";
     byte letter;
-    for (byte i = 0; i < mfrc522.uid.size; i++) {
+    for (byte i = 0; i < mfrc522.uid.size; i++)
+    {
         readKey.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
         readKey.concat(String(mfrc522.uid.uidByte[i], HEX));
     }
     readKey.toUpperCase();
-    if (readKey.substring(1) == rfidKey) {
+    if (readKey.substring(1) == rfidKey)
+    {
         return true;
-    } else {
+    }
+    else
+    {
         return false;
     }
 }
 
-void lockLid() {
+void lockLid()
+{
     int rfidCooldown;
     if (rfidCooldown + 5000 <= millis())
     {
@@ -217,7 +232,8 @@ void lockLid() {
                 sendCommand("page 4");
                 digitalWrite(LED_STAT, LOW);
             }
-        } else if (lidLocked)
+        }
+        else if (lidLocked)
         {
             if (readRFID())
             {
@@ -233,7 +249,8 @@ void lockLid() {
 }
 
 // EEPROM Functions
-void saveNames() {
+void saveNames()
+{
     int adress = 0;
     for (int i = 0; i < 5; i++)
     {
@@ -246,7 +263,8 @@ void saveNames() {
     saveEmptySlots();
 }
 
-void loadNames() {
+void loadNames()
+{
     int adress = 0;
     for (int i = 0; i < 5; i++)
     {
@@ -258,32 +276,41 @@ void loadNames() {
     }
 }
 
-void writeStringToEEPROM(int addrOffset, const String &strToWrite) {
+void writeStringToEEPROM(int addrOffset, const String &strToWrite)
+{
     byte len = strToWrite.length();
     EEPROM.write(addrOffset, len);
-    for (int i = 0; i < len; i++) {
+    for (int i = 0; i < len; i++)
+    {
         EEPROM.write(addrOffset + 1 + i, strToWrite[i]);
     }
 }
 
-String readStringFromEEPROM(int addrOffset) {
+String readStringFromEEPROM(int addrOffset)
+{
     int newStrLen = EEPROM.read(addrOffset);
     char data[newStrLen + 1];
-    for (int i = 0; i < newStrLen; i++) {
+    for (int i = 0; i < newStrLen; i++)
+    {
         data[i] = EEPROM.read(addrOffset + 1 + i);
     }
     data[newStrLen] = '\0';
     return String(data);
 }
 
-void saveEmptySlots() {
+void saveEmptySlots()
+{
     int adress = 999;
-    for (int i = 0; i < 5; i++) {
-        for (int j = 0; j < 5; j++) {
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 5; j++)
+        {
             if (names[i][j] == "")
             {
                 EEPROM.write(adress, 1);
-            } else {
+            }
+            else
+            {
                 EEPROM.write(adress, 0);
             }
             adress++;
@@ -291,13 +318,19 @@ void saveEmptySlots() {
     }
 }
 
-void loadEmptySlots() {
+void loadEmptySlots()
+{
     int adress = 999;
-    for (int i = 0; i < 5; i++) {
-        for (int j = 0; j < 5; j++) {
-            if (EEPROM.read(adress) == 1) {
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 5; j++)
+        {
+            if (EEPROM.read(adress) == 1)
+            {
                 sendCommand("Button_page.bt" + String(btIDs[i][j]) + ".val=1");
-            } else {
+            }
+            else
+            {
                 sendCommand("Button_page.bt" + String(btIDs[i][j]) + ".val=0");
             }
             adress++;
