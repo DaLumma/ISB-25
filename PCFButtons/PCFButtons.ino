@@ -73,6 +73,7 @@ void setup(){
     loadNames();
     writeNames();
     sendCommand("page 1");
+    digitalWrite(LED_STAT, HIGH);
 }
 
 void loop(){
@@ -111,6 +112,7 @@ void readNames(){
     {   
         if (receivedText == "begin")
         {
+            digitalWrite(LED_STAT, LOW);
             Serial.println(nextion.available());
             for (int i = 0; i < 5; i++)
             {
@@ -124,6 +126,7 @@ void readNames(){
             saveNames();
             writeNames();
             sendCommand("page 1");
+            digitalWrite(LED_STAT, HIGH);
         }
     }
 }
@@ -212,6 +215,7 @@ void lockLid() {
                 Servo1.write(lockedDeg);
                 Servo2.write(lockedDeg);
                 sendCommand("page 4");
+                digitalWrite(LED_STAT, LOW);
             }
         } else if (lidLocked)
         {
@@ -221,6 +225,7 @@ void lockLid() {
                 Servo1.write(unlockedDeg);
                 Servo2.write(unlockedDeg);
                 sendCommand("page 1");
+                digitalWrite(LED_STAT, HIGH);
             }
         }
         rfidCooldown = millis();
