@@ -58,11 +58,11 @@ void setup()
     pinMode(LED_STAT, OUTPUT);
 
     sendCommand("page 0");
-    PCFsetup(PCF1, 0x20);
-    PCFsetup(PCF2, 0x21);
-    PCFsetup(PCF3, 0x3A);
-    PCFsetup(PCF4, 0x3B);
-    PCFsetup(PCF5, 0x3C);
+    PCFsetup(PCF1, 0x23);
+    PCFsetup(PCF2, 0x24);
+    PCFsetup(PCF3, 0x25);
+    PCFsetup(PCF4, 0x26);
+    PCFsetup(PCF5, 0x27);
 
     PCFread(PCF1, 0);
     PCFread(PCF2, 1);
