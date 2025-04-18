@@ -48,8 +48,9 @@ void setup()
     mfrc522.PCD_Init();
 
     Servo1.attach(PWM_Servo1);
-    Servo2.attach(PWM_Servo2);
     Servo1.write(unlockedDeg);
+    delay(1000);
+    Servo2.attach(PWM_Servo2);
     Servo2.write(unlockedDeg);
 
     pinMode(Door_Switch1, INPUT_PULLUP);
@@ -228,9 +229,10 @@ void lockLid()
             {
                 lidLocked = true;
                 Servo1.write(lockedDeg);
-                Servo2.write(lockedDeg);
                 sendCommand("page 4");
                 digitalWrite(LED_STAT, LOW);
+                delay(1000);
+                Servo2.write(lockedDeg);
             }
         }
         else if (lidLocked)
@@ -239,6 +241,7 @@ void lockLid()
             {
                 lidLocked = false;
                 Servo1.write(unlockedDeg);
+                delay(1000);
                 Servo2.write(unlockedDeg);
                 sendCommand("page 1");
                 digitalWrite(LED_STAT, HIGH);
