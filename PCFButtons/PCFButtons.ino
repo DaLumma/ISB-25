@@ -64,16 +64,17 @@ void setup()
     PCFsetup(PCF3, 0x25);
     PCFsetup(PCF4, 0x26);
     PCFsetup(PCF5, 0x27);
-
+    
     PCFread(PCF1, 0);
     PCFread(PCF2, 1);
     PCFread(PCF3, 2);
     PCFread(PCF4, 3);
     PCFread(PCF5, 4);
-
+    
     loadNames();
     writeNames();
     sendCommand("page 1");
+    sendCommand("wav0.en=1");
     digitalWrite(LED_STAT, HIGH);
 }
 
@@ -228,9 +229,9 @@ void lockLid()
             if (readRFID())
             {
                 lidLocked = true;
-                Servo1.write(lockedDeg);
                 sendCommand("page 4");
                 digitalWrite(LED_STAT, LOW);
+                Servo1.write(lockedDeg);
                 delay(1000);
                 Servo2.write(lockedDeg);
             }
@@ -245,6 +246,7 @@ void lockLid()
                 Servo2.write(unlockedDeg);
                 sendCommand("page 1");
                 digitalWrite(LED_STAT, HIGH);
+                sendCommand("wav0.en=1");
             }
         }
         rfidCooldown = millis();
